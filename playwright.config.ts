@@ -28,8 +28,8 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('')`. */
     baseURL: 'https://www.saucedemo.com',
 
-    /* Run with a visible browser */
-    headless: false,
+    /* Headless on CI (no display), visible browser locally */
+    headless: !!process.env.CI,
 
     /* Swag Labs uses data-test instead of data-testid */
     testIdAttribute: 'data-test',
@@ -58,12 +58,17 @@ export default defineConfig({
     //   use: { ...devices['Desktop Firefox'] },
     // },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-      testIgnore: /.*\.setup\.ts/,
-      dependencies: ['setup'],
-    },
+    /* WebKit runs locally only; CI runs chromium only */
+    ...(process.env.CI
+      ? []
+      : [
+          {
+            name: 'webkit',
+            use: { ...devices['Desktop Safari'] },
+            testIgnore: /.*\.setup\.ts/,
+            dependencies: ['setup'],
+          },
+        ]),
 
     /* Test against mobile viewports. */
     // {
